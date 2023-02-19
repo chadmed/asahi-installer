@@ -41,6 +41,7 @@ CHIP_MIN_VER = {
     0x6001: "12.0",     # T6001, M1 Max
     0x6002: "12.3",     # T6002, M1 Ultra
     0x8112: "12.4",     # T8112, M2
+    0x6020: "13.2",     # T6020, M2 Pro
 }
 
 DEVICES = {
@@ -57,6 +58,7 @@ DEVICES = {
     "j375dap":  Device("12.3", False),  # Mac Studio (M1 Ultra, 2022)
     "j413ap":   Device("12.4", False),  # MacBook Air (M2, 2022)
     "j493ap":   Device("12.4", False),  # MacBook Pro (13-inch, M2, 2022)
+    "j474sap":  Device("13.2", True),   # Mac mini (M2 Pro, 2023)
 }
 
 IPSW_VERSIONS = [
@@ -86,6 +88,12 @@ IPSW_VERSIONS = [
          "21.5.230.0.0,0",
          False,
          "https://updates.cdn-apple.com/2022SpringFCS/fullrestores/071-08757/74A4F2A1-C747-43F9-A22A-C0AD5FB4ECB6/UniversalMac_12.3_21E230_Restore.ipsw"),
+    IPSW("13.2",
+         "13.2",
+         "iBoot-8419.80.7",
+         "22.4.49.0.0,0",
+         True,
+         "https://updates.cdn-apple.com/2023WinterFCS/fullrestores/032-35688/0350BB21-2B4B-4850-BF77-70B830283B28/UniversalMac_13.2_22D49_Restore.ipsw"),
 ]
 
 class InstallerMain:
