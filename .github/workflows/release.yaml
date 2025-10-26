@@ -16,10 +16,6 @@ jobs:
   upload-artefact:
     needs: build
     runs-on: ubuntu-latest
-    env:
-        PKG_URL: "https://storage.bunnycdn.com/asahilinux/${{ inputs.upload-type }}"
-        PKG_VER: "installer-${{ jobs.build.outputs.version }}"
-        RELEASE_PKG: "releases/${{ env.PKG_VER }}"
     steps:
       - name: Download artefact
         uses: actions/download-artifact@v4
@@ -28,8 +24,11 @@ jobs:
           path: releases/.
 
       - name: Push to Bunny
+        env:
+          PKG_URL: "https://storage.bunnycdn.com/asahilinux/${{ inputs.upload-type }}"
+          PKG_VER: "installer-${{ needs.build.outputs.installer_ver }}"
         run: |
-          if [ ! -e "${RELEASE_PKG}" ]; then
+          if [ ! -e "releases/${PKG_VER}" ]; then
               echo "Package not found!"
               exit 1
           fi
@@ -43,5 +42,5 @@ jobs:
                    --data-binary @${1}
           }
 
-          upload "${{ env.RELEASE_PKG }}" "${{ env.PKG_URL }}/${{ env.PKG_VER }}" "application/octet-stream"
-          upload "releases/latest" "${{ env.PKG_URL }}/latest" "text/plain"
+          upload "releases/${PKG_VER}" "${PKG_URL}/${PKG_VER}" "application/octet-stream"
+          upload "releases/latest" "${PKG_URL}/latest" "text/plain"
