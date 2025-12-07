@@ -6,37 +6,40 @@ on:
   workflow_dispatch:
   workflow_call:
     outputs:
-        installer_ver:
-            description: asahi-installer built version string
-            value: ${{ jobs.build.outputs.installer_ver }}
+      installer_ver:
+        description: asahi-installer built version string
+        value: ${{ jobs.build.outputs.installer_ver }}
 
 jobs:
   build:
-      runs-on: ubuntu-latest
+    runs-on: ubuntu-latest
+    outputs:
+      installer_ver: ${{ steps.compile.outputs.installer_ver }}
 
-      steps:
-        - uses: actions/checkout@v5
-          with:
-            fetch-depth: 0
-            fetch-tags: true
-            submodules: recursive
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+          fetch-tags: true
+          submodules: recursive
 
-        - name: Install build dependencies
-          run: |
-            sudo apt-get update
-            sudo apt-get install --no-install-recommends -y gcc-aarch64-linux-gnu
-            sudo apt-get install --no-install-recommends -y 7zip jq
-            rustup target install aarch64-unknown-none-softfloat
+      - name: Install build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install --no-install-recommends -y gcc-aarch64-linux-gnu
+          sudo apt-get install --no-install-recommends -y 7zip jq
+          rustup target install aarch64-unknown-none-softfloat
 
-        - name: Build asahi-installer
-          run: |
-            ./build.sh
-            echo "installer_ver=$(cat releases/latest)" >> $GITHUB_OUTPUT
-            cat ${GITHUB_OUTPUT}
+      - name: Build asahi-installer
+        id: compile
+        run: |
+          ./build.sh
+          echo "installer_ver=$(cat releases/latest).tar.gz" >> $GITHUB_OUTPUT
+          cat ${GITHUB_OUTPUT}
 
-        - name: Upload artefact
-          uses: actions/upload-artifact@v4
-          with:
-            name: installer-build
-            path: |
-              releases/*
+      - name: Upload artefact
+        uses: actions/upload-artifact@v4
+        with:
+          name: installer-build
+          path: |
+            releases/*
