@@ -28,6 +28,8 @@ jobs:
           PKG_URL: "https://storage.bunnycdn.com/asahilinux/${{ inputs.upload-type }}"
           PKG_VER: "installer-${{ needs.build.outputs.installer_ver }}"
         run: |
+          echo ${PKG_VER}
+          echo ${PKG_URL}
           if [ ! -e "releases/${PKG_VER}" ]; then
               echo "Package not found!"
               exit 1

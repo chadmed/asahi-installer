@@ -32,6 +32,7 @@ jobs:
           run: |
             ./build.sh
             echo "installer_ver=$(cat releases/latest)" >> $GITHUB_OUTPUT
+            cat ${GITHUB_OUTPUT}
 
         - name: Upload artefact
           uses: actions/upload-artifact@v4
