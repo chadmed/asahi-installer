@@ -2,11 +2,11 @@ name: release-dev
 
 on:
   push:
-    branches: [ main ]
+    branches: [ ci-dev ]
   workflow_dispatch:
 
 jobs:
   release-dev:
     uses: ./.github/workflows/release.yaml
     with:
-      upload-type: installer-dev
+      upload-type: installer-citest
