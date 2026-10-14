@@ -1,13 +1,16 @@
 # SPDX-License-Identifier: GPL-2.0-or-later
-import os, os.path, plistlib, shutil, sys, stat, subprocess, urlcache, zipfile, logging, json, tempfile
-import osenum
-from asahi_firmware.wifi import WiFiFWCollection
-from asahi_firmware.bluetooth import BluetoothFWCollection
-from asahi_firmware.multitouch import MultitouchFWCollection
-from asahi_firmware.kernel import KernelFWCollection
-from asahi_firmware.isp import ISPFWCollection
-from asahi_firmware.als import AlsFWCollection, FACTORY_DIR
-from util import *
+import os, os.path, plistlib, shutil, sys, stat, subprocess, zipfile, logging, json, tempfile
+
+from . import osenum
+from . import urlcache
+
+from .asahi_firmware.wifi import WiFiFWCollection
+from .asahi_firmware.bluetooth import BluetoothFWCollection
+from .asahi_firmware.multitouch import MultitouchFWCollection
+from .asahi_firmware.kernel import KernelFWCollection
+from .asahi_firmware.isp import ISPFWCollection
+from .asahi_firmware.als import AlsFWCollection, FACTORY_DIR
+from .util import *
 
 class StubInstaller(PackageInstaller):
     def __init__(self, sysinfo, dutil, osinfo):

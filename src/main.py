@@ -1,10 +1,18 @@
 #!/usr/bin/python3
 # SPDX-License-Identifier: GPL-2.0-or-later
-import os, os.path, shlex, subprocess, sys, time, termios, json, getpass, reporting
+import os, os.path, shlex, subprocess, sys, time, termios, json, getpass
 from dataclasses import dataclass
 
-import system, osenum, stub, diskutil, osinstall, asahi_firmware, m1n1, bugs
-from util import *
+from core.asahi_firmware import *
+from core.bugs import *
+from core.diskutil import *
+from core.m1n1 import *
+from core.osenum import *
+from core.osinstall import *
+from core.reporting import *
+from core.stub import *
+from core.system import *
+from core.util import *
 
 PART_ALIGN = psize("1MiB")
 
