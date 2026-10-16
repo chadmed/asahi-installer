@@ -14,14 +14,6 @@ PART_ALIGN = psize("1MiB")
 
 STUB_SIZE = align_down(psize("2.5GB"), PART_ALIGN)
 
-# Minimum free space to leave when resizing, to allow for OS upgrades
-MIN_FREE_OS = psize("38GB")
-# Minimum free space to leave for non-OS containers
-MIN_FREE = psize("1GB")
-
-# 2.5GB stub + 5GB OS + 0.5GB EFI = 8GB, round up to 10GB
-MIN_INSTALL_FREE = psize("10GB")
-
 MIN_MACOS_VERSION = "13.5"
 MIN_MACOS_VERSION_EXPERT = "12.3"
 
@@ -143,6 +135,55 @@ class InstallerCore:
         self.dutil = DiskUtil()
         self.sys_disk = None
         self.cur_disk = None
+        self.partitions_freespace = []
+        self.partitions_empty_apfs = []
+        self.partitions_resizable = []
+        self.partitions_incomplete = []
+        self.partitions_no_volboot = []
+        self.partitions_upgradeable = []
+        self.partitions_vendorfw = []
+
+    def disk_info_init(self):
+        self.dutil.get_info()
+
+        self.cur_disk = self.sys_disk = self.dutil.find_system_disk()
+
+        if self.expert:
+            self.external_disks = self.dutil.find_external_disks()
+        else:
+            self.external_disks = None
+
+        self.partitions = self.dutil.get_partitions(self.cur_disk)
+
+    def parse_partitions(self):
+        for i, p in enumerate(self.partitions):
+            p.index = i
+            if p.type in ["Apple_APFS_ISC"]:
+                continue
+            if p.free:
+                p.desc = f"(free space: {ssize(p.size)})"
+                if p.size >= STUB_SIZE:
+                    self.partitions_freespace.append(p)
+            elif p.type.startswith("Apple_APFS"):
+                p.desc = "APFS"
+                if p.type == "Apple_APFS_Recovery":
+                    p.desc += " (System Recovery)"
+                if p.label is not None:
+                    p.desc += f" [{p.label}]"
+                if p.container is None:
+                    p.desc += f" (not a container)"
+                else:
+                    volumes = p.container["Volumes"]
+                    p.desc += f" ({ssize(p.size)}, {len(volumes)} volume{'s' if len(vols) != 1 else ''})"
+                    try:
+                        if p.can_resize(self.expert or self.is_edu_128gb):
+                            partitions_resizable.append(p)
+                    except Exception as e:
+                        logging.info(f"{e}")
+                        if p.size >= STUB_SIZE * 0.95:
+                            self.partitions_empty_apfs.append(p)
+            else:
+                p.desc = f"{p.type} ({ssize(p.size)})"
 
     def os_valid(self) -> bool:
         if self.cur_os is None:

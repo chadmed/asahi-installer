@@ -1,10 +1,17 @@
 # SPDX-License-Identifier: GPL-2.0-or-later
 import plistlib, subprocess, sys, logging
-from dataclasses import dataclass
 
+from .exceptions import *
 from .util import *
 
-@dataclass
+# Minimum free space to leave when resizing, to allow for OS upgrades
+MIN_FREE_OS = psize("38GB")
+# Minimum free space to leave for non-OS containers
+MIN_FREE = psize("1GB")
+
+# 2.5GB stub + 5GB OS + 0.5GB EFI = 8GB, round up to 10GB
+MIN_INSTALL_FREE = psize("10GB")
+
 class Partition:
     name: str
     offset: int
@@ -17,6 +24,34 @@ class Partition:
     info: object = None
     container: object = None
     os: object = None
+    can_resize: bool = False
+
+    def min_free_space(self, nolimits):
+        if self.os and any(os.version for os in self.os) and not nolimits:
+            return MIN_FREE_OS
+        else:
+            return MIN_FREE
+
+    def can_resize(self, nolimits):
+        if self.type != "Apple_APFS":
+            e = f"{self.name} is not an APFS partition."
+            logging.error(e)
+            raise PartitionNotAPFSError(e)
+
+        if self.container is None:
+            e = f"{self.name} contains no valid APFS containers."
+            logging.error(e)
+            raise PartitionNoContainersError(e)
+
+        free = self.container["CapacityFree"]
+        min_free = self.min_free_space(nolimits)
+
+        if free <= min_free:
+            e = f"{self.name} has insufficient free space (has {free}, requires {min_free})"
+            logging.error(e)
+            raise PartitionNoFreeSpaceError(e)
+
+        return True
 
 class DiskUtil:
     FREE_THRESHOLD = 16 * 1024 * 1024
